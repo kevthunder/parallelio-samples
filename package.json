@@ -1,0 +1,22 @@
+{
+  "name": "parallelio-samples",
+  "version": "0.1.0",
+  "description": "Samples for Parallelio",
+  "main": "index.js",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/kevthunder/parallelio-samples.git"
+  },
+  "scripts": {
+    "test": "gulp test",
+    "start": "gulp open"
+  },
+  "author": "kevthunder",
+  "license": "ISC",
+  "dependencies": {
+    "gulp": "^4.0",
+    "gulp-coffee": "^3.0.2",
+    "gulp-live-server": "0.0.31",
+    "gulp-open": "^3.0.1"
+  }
+}
