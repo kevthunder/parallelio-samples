@@ -14,9 +14,13 @@
   "author": "kevthunder",
   "license": "ISC",
   "dependencies": {
+    "parallelio-dom": "github:kevthunder/parallelio-dom"
+  },
+  "devDependencies": {
     "gulp": "^4.0",
-    "gulp-coffee": "^3.0.2",
+    "gulp-coffee": "^3.0.3",
     "gulp-live-server": "0.0.31",
-    "gulp-open": "^3.0.1"
+    "gulp-open": "^3.0.1",
+    "gulp-index": "^0.2.0"
   }
 }
