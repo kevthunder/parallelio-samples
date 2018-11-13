@@ -22,7 +22,6 @@
     "gulp-index": "^0.2.0",
     "gulp-live-server": "0.0.31",
     "gulp-open": "^3.0.1",
-    "gulp-sass": "^4.0.1",
-    "gulp-watch": "^5.0.1"
+    "gulp-sass": "^4.0.1"
   }
 }
