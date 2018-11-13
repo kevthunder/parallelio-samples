@@ -1,1 +1,1 @@
-console.log('hi!')
+this.game = new Parallelio.Game()
