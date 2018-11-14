@@ -7,7 +7,10 @@ var sass = require('gulp-sass');
 
 
 function libSources(){
-  return [require.resolve('parallelio-dom/dist/parallelio-and-dom.js')]
+  return [
+    require.resolve('parallelio-dom/dist/parallelio-and-dom.js'),
+    require.resolve('parallelio-dom/css/parallelio-dom.css')
+  ]
 }
 gulp.task('copyLib', function() {
   return gulp.src(libSources())

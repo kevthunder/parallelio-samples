@@ -1,0 +1,104 @@
+@charset "UTF-8";
+.tile {
+  position: absolute;
+  background: #333;
+  width: 19px;
+  height: 19px; }
+  .tile.wall {
+    background: #222; }
+  .tile.floor {
+    background: #444; }
+
+.door {
+  z-index: 8;
+  position: absolute; }
+  .door:before, .door:after {
+    content: '';
+    position: absolute;
+    display: block;
+    width: 10px;
+    height: 10px;
+    background: #000; }
+  .door.horizontal:before, .door.horizontal:after {
+    top: 5px; }
+  .door.horizontal.open:before, .door.horizontal.open:after {
+    width: 2px; }
+  .door.horizontal.open:after {
+    left: 17px; }
+  .door.horizontal:after {
+    left: 9px; }
+  .door.vertical:before, .door.vertical:after {
+    left: 5px; }
+  .door.vertical.open:before, .door.vertical.open:after {
+    height: 2px; }
+  .door.vertical.open:after {
+    top: 17px; }
+  .door.vertical:after {
+    top: 9px; }
+  .door:before {
+    left: 0; }
+
+.character {
+  z-index: 10;
+  position: absolute;
+  font-size: 20px;
+  width: 20px;
+  text-align: center; }
+  .character:before {
+    display: inline-block;
+    font-family: FontAwesome;
+    text-rendering: auto;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    content: ""; }
+  .character.selected {
+    color: #eee; }
+
+.wire {
+  position: absolute;
+  background: #000;
+  width: 5px;
+  height: 5px;
+  margin: 7px 0 0 7px; }
+  .wire.red {
+    background: #300; }
+    .wire.red::before, .wire.red::after {
+      background: #300; }
+    .wire.red.activated {
+      background: #600; }
+      .wire.red.activated::before, .wire.red.activated::after {
+        background: #600; }
+  .wire.blue {
+    background: #003; }
+    .wire.blue::before, .wire.blue::after {
+      background: #003; }
+    .wire.blue.activated {
+      background: #036; }
+      .wire.blue.activated::before, .wire.blue.activated::after {
+        background: #036; }
+  .wire.connLeft::before, .wire.connRight::before {
+    position: absolute;
+    height: 3px;
+    top: 1px;
+    width: 10px;
+    content: ""; }
+  .wire.connLeft::before {
+    right: 2px; }
+  .wire.connRight::before {
+    left: 2px; }
+  .wire.connRight.connLeft::before {
+    width: 19px;
+    left: -7px; }
+  .wire.connDown::after, .wire.connUp::after {
+    position: absolute;
+    width: 3px;
+    left: 1px;
+    height: 10px;
+    content: ""; }
+  .wire.connDown::after {
+    top: 2px; }
+  .wire.connUp::after {
+    bottom: 2px; }
+  .wire.connUp.connDown::after {
+    height: 19px;
+    top: -7px; }

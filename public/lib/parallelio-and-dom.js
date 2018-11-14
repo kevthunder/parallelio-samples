@@ -1357,8 +1357,8 @@
         return this;
       }
 
-      revalidate() {
-        super.revalidate();
+      revalidated() {
+        super.revalidated();
         return this.revalidateUpdater();
       }
 
@@ -3303,6 +3303,400 @@
   });
 
   (function(definition) {
+    Parallelio.Spark.EventEmitter = definition();
+    return Parallelio.Spark.EventEmitter.definition = definition;
+  })(function() {
+    var EventEmitter;
+    EventEmitter = (function() {
+      class EventEmitter {
+        getAllEvents() {
+          return this._events || (this._events = {});
+        }
+
+        getListeners(e) {
+          var events;
+          events = this.getAllEvents();
+          return events[e] || (events[e] = []);
+        }
+
+        hasListener(e, listener) {
+          return this.getListeners(e).includes(listener);
+        }
+
+        addListener(e, listener) {
+          if (!this.hasListener(e, listener)) {
+            this.getListeners(e).push(listener);
+            return this.listenerAdded(e, listener);
+          }
+        }
+
+        listenerAdded(e, listener) {}
+
+        removeListener(e, listener) {
+          var index, listeners;
+          listeners = this.getListeners(e);
+          index = listeners.indexOf(listener);
+          if (index !== -1) {
+            listeners.splice(index, 1);
+            return this.listenerRemoved(e, listener);
+          }
+        }
+
+        listenerRemoved(e, listener) {}
+
+        emitEvent(e, ...args) {
+          var listeners;
+          listeners = this.getListeners(e);
+          return listeners.forEach(function(listener) {
+            return listener(...args);
+          });
+        }
+
+      };
+
+      EventEmitter.prototype.emit = EventEmitter.prototype.emitEvent;
+
+      EventEmitter.prototype.trigger = EventEmitter.prototype.emitEvent;
+
+      EventEmitter.prototype.on = EventEmitter.prototype.addListener;
+
+      EventEmitter.prototype.off = EventEmitter.prototype.removeListener;
+
+      return EventEmitter;
+
+    }).call(this);
+    return EventEmitter;
+  });
+
+  (function(definition) {
+    Parallelio.GridCell = definition();
+    return Parallelio.GridCell.definition = definition;
+  })(function(dependencies = {}) {
+    var Element, EventEmitter, GridCell;
+    Element = dependencies.hasOwnProperty("Element") ? dependencies.Element : Parallelio.Spark.Element;
+    EventEmitter = dependencies.hasOwnProperty("EventEmitter") ? dependencies.EventEmitter : Parallelio.Spark.EventEmitter;
+    GridCell = (function() {
+      class GridCell extends Element {};
+
+      GridCell.extend(EventEmitter);
+
+      GridCell.properties({
+        grid: {
+          calcul: function(invalidator) {
+            return invalidator.prop('grid', invalidator.prop('row'));
+          }
+        },
+        row: {},
+        columnPosition: {
+          calcul: function(invalidator) {
+            var row;
+            row = invalidator.prop('row');
+            if (row) {
+              return invalidator.prop('cells', row).indexOf(this);
+            }
+          }
+        },
+        width: {
+          calcul: function(invalidator) {
+            return 1 / invalidator.prop('cells', invalidator.prop('row')).length;
+          }
+        },
+        left: {
+          calcul: function(invalidator) {
+            return invalidator.prop('width') * invalidator.prop('columnPosition');
+          }
+        },
+        right: {
+          calcul: function(invalidator) {
+            return invalidator.prop('width') * (invalidator.prop('columnPosition') + 1);
+          }
+        },
+        height: {
+          calcul: function(invalidator) {
+            return invalidator.prop('height', invalidator.prop('row'));
+          }
+        },
+        top: {
+          calcul: function(invalidator) {
+            return invalidator.prop('top', invalidator.prop('row'));
+          }
+        },
+        bottom: {
+          calcul: function(invalidator) {
+            return invalidator.prop('bottom', invalidator.prop('row'));
+          }
+        }
+      });
+
+      return GridCell;
+
+    }).call(this);
+    return GridCell;
+  });
+
+  (function(definition) {
+    Parallelio.GridRow = definition();
+    return Parallelio.GridRow.definition = definition;
+  })(function(dependencies = {}) {
+    var Element, EventEmitter, GridCell, GridRow;
+    Element = dependencies.hasOwnProperty("Element") ? dependencies.Element : Parallelio.Spark.Element;
+    EventEmitter = dependencies.hasOwnProperty("EventEmitter") ? dependencies.EventEmitter : Parallelio.Spark.EventEmitter;
+    GridCell = dependencies.hasOwnProperty("GridCell") ? dependencies.GridCell : Parallelio.GridCell;
+    GridRow = (function() {
+      class GridRow extends Element {
+        addCell(cell = null) {
+          if (!cell) {
+            cell = new GridCell();
+          }
+          this.cells.push(cell);
+          return cell;
+        }
+
+      };
+
+      GridRow.extend(EventEmitter);
+
+      GridRow.properties({
+        grid: {},
+        cells: {
+          collection: true,
+          itemAdded: function(cell) {
+            return cell.row = this;
+          },
+          itemRemoved: function(cell) {
+            if (cell.row === this) {
+              return cell.row = null;
+            }
+          }
+        },
+        rowPosition: {
+          calcul: function(invalidator) {
+            var grid;
+            grid = invalidator.prop('grid');
+            if (grid) {
+              return invalidator.prop('rows', grid).indexOf(this);
+            }
+          }
+        },
+        height: {
+          calcul: function(invalidator) {
+            return 1 / invalidator.prop('rows', invalidator.prop('grid')).length;
+          }
+        },
+        top: {
+          calcul: function(invalidator) {
+            return invalidator.prop('height') * invalidator.prop('rowPosition');
+          }
+        },
+        bottom: {
+          calcul: function(invalidator) {
+            return invalidator.prop('height') * (invalidator.prop('rowPosition') + 1);
+          }
+        }
+      });
+
+      return GridRow;
+
+    }).call(this);
+    return GridRow;
+  });
+
+  (function(definition) {
+    Parallelio.Grid = definition();
+    return Parallelio.Grid.definition = definition;
+  })(function(dependencies = {}) {
+    var Element, EventEmitter, Grid, GridCell, GridRow;
+    Element = dependencies.hasOwnProperty("Element") ? dependencies.Element : Parallelio.Spark.Element;
+    EventEmitter = dependencies.hasOwnProperty("EventEmitter") ? dependencies.EventEmitter : Parallelio.Spark.EventEmitter;
+    GridCell = dependencies.hasOwnProperty("GridCell") ? dependencies.GridCell : Parallelio.GridCell;
+    GridRow = dependencies.hasOwnProperty("GridRow") ? dependencies.GridRow : Parallelio.GridRow;
+    Grid = (function() {
+      class Grid extends Element {
+        addCell(cell = null) {
+          var row, spot;
+          if (!cell) {
+            cell = new GridCell();
+          }
+          spot = this.getFreeSpot();
+          row = this.rows.get(spot.row);
+          if (!row) {
+            row = this.addRow();
+          }
+          row.addCell(cell);
+          return cell;
+        }
+
+        addRow(row = null) {
+          if (!row) {
+            row = new GridRow();
+          }
+          this.rows.push(row);
+          return row;
+        }
+
+        getFreeSpot() {
+          var spot;
+          spot = null;
+          this.rows.some((row) => {
+            if (row.cells.length < this.maxColumns) {
+              return spot = {
+                row: row.rowPosition,
+                column: row.cells.length
+              };
+            }
+          });
+          if (!spot) {
+            if (this.maxColumns > this.rows.length) {
+              spot = {
+                row: this.rows.length,
+                column: 0
+              };
+            } else {
+              spot = {
+                row: 0,
+                column: this.maxColumns + 1
+              };
+            }
+          }
+          return spot;
+        }
+
+      };
+
+      Grid.extend(EventEmitter);
+
+      Grid.properties({
+        rows: {
+          collection: true,
+          itemAdded: function(row) {
+            return row.grid = this;
+          },
+          itemRemoved: function(row) {
+            if (row.grid === this) {
+              return row.grid = null;
+            }
+          }
+        },
+        maxColumns: {
+          calcul: function(invalidator) {
+            var rows;
+            rows = invalidator.prop('rows');
+            return rows.reduce(function(max, row) {
+              return Math.max(max, invalidator.prop('cells', row).length);
+            }, 0);
+          }
+        }
+      });
+
+      return Grid;
+
+    }).call(this);
+    return Grid;
+  });
+
+  (function(definition) {
+    Parallelio.View = definition();
+    return Parallelio.View.definition = definition;
+  })(function(dependencies = {}) {
+    var Element, Grid, View;
+    Element = dependencies.hasOwnProperty("Element") ? dependencies.Element : Parallelio.Spark.Element;
+    Grid = dependencies.hasOwnProperty("Grid") ? dependencies.Grid : Parallelio.Grid;
+    View = (function() {
+      class View extends Element {
+        setDefaults() {
+          var ref3, ref4;
+          if (!this.bounds) {
+            this.grid = this.grid || ((ref3 = this.game._mainView) != null ? (ref4 = ref3.value) != null ? ref4.grid : void 0 : void 0) || new Grid();
+            return this.bounds = this.grid.addCell();
+          }
+        }
+
+        destroy() {
+          return this.game = null;
+        }
+
+      };
+
+      View.properties({
+        game: {
+          change: function(old) {
+            if (this.game) {
+              this.game.views.add(this);
+              this.setDefaults();
+            }
+            if (old) {
+              return old.views.remove(this);
+            }
+          }
+        },
+        x: {
+          default: 0
+        },
+        y: {
+          default: 0
+        },
+        grid: {
+          default: null
+        },
+        bounds: {
+          default: null
+        }
+      });
+
+      return View;
+
+    }).call(this);
+    return View;
+  });
+
+  (function(definition) {
+    Parallelio.Game = definition();
+    return Parallelio.Game.definition = definition;
+  })(function(dependencies = {}) {
+    var Element, Game, Timing, View;
+    Element = dependencies.hasOwnProperty("Element") ? dependencies.Element : Parallelio.Spark.Element;
+    Timing = dependencies.hasOwnProperty("Timing") ? dependencies.Timing : Parallelio.Timing;
+    View = dependencies.hasOwnProperty("View") ? dependencies.View : Parallelio.View;
+    Game = (function() {
+      class Game extends Element {
+        start() {}
+
+        add(elem) {
+          elem.game = this;
+          return elem;
+        }
+
+      };
+
+      Game.properties({
+        timing: {
+          calcul: function() {
+            return new Timing();
+          }
+        },
+        mainView: {
+          calcul: function() {
+            if (this.views.length > 0) {
+              return this.views.get(0);
+            } else {
+              return this.add(new this.defaultViewClass());
+            }
+          }
+        },
+        views: {
+          collection: true
+        }
+      });
+
+      Game.prototype.defaultViewClass = View;
+
+      return Game;
+
+    }).call(this);
+    return Game;
+  });
+
+  (function(definition) {
     Parallelio.Projectile = definition();
     return Parallelio.Projectile.definition = definition;
   })(function(dependencies = {}) {
@@ -4748,72 +5142,6 @@
     return Wire;
   });
 
-  (function(definition) {
-    Parallelio.Spark.EventEmitter = definition();
-    return Parallelio.Spark.EventEmitter.definition = definition;
-  })(function() {
-    var EventEmitter;
-    EventEmitter = (function() {
-      class EventEmitter {
-        getAllEvents() {
-          return this._events || (this._events = {});
-        }
-
-        getListeners(e) {
-          var events;
-          events = this.getAllEvents();
-          return events[e] || (events[e] = []);
-        }
-
-        hasListener(e, listener) {
-          return this.getListeners(e).includes(listener);
-        }
-
-        addListener(e, listener) {
-          if (!this.hasListener(e, listener)) {
-            this.getListeners(e).push(listener);
-            return this.listenerAdded(e, listener);
-          }
-        }
-
-        listenerAdded(e, listener) {}
-
-        removeListener(e, listener) {
-          var index, listeners;
-          listeners = this.getListeners(e);
-          index = listeners.indexOf(listener);
-          if (index !== -1) {
-            listeners.splice(index, 1);
-            return this.listenerRemoved(e, listener);
-          }
-        }
-
-        listenerRemoved(e, listener) {}
-
-        emitEvent(e, ...args) {
-          var listeners;
-          listeners = this.getListeners(e);
-          return listeners.forEach(function(listener) {
-            return listener(...args);
-          });
-        }
-
-      };
-
-      EventEmitter.prototype.emit = EventEmitter.prototype.emitEvent;
-
-      EventEmitter.prototype.trigger = EventEmitter.prototype.emitEvent;
-
-      EventEmitter.prototype.on = EventEmitter.prototype.addListener;
-
-      EventEmitter.prototype.off = EventEmitter.prototype.removeListener;
-
-      return EventEmitter;
-
-    }).call(this);
-    return EventEmitter;
-  });
-
 }).call(this);
 
 (function() {
@@ -5123,6 +5451,197 @@
   });
 
   (function(definition) {
+    DOM.View = definition();
+    return DOM.View.definition = definition;
+  })(function(dependencies = {}) {
+    var BaseView, Display, Updater, View;
+    BaseView = dependencies.hasOwnProperty("BaseView") ? dependencies.BaseView : Parallelio.View;
+    Updater = dependencies.hasOwnProperty("Updater") ? dependencies.Updater : DOM.Updater;
+    Display = dependencies.hasOwnProperty("Display") ? dependencies.Display : DOM.Display;
+    View = (function() {
+      class View extends BaseView {
+        constructor(display = null) {
+          super();
+          if (display != null) {
+            this.display = display;
+          }
+          this.hovered = false;
+          this.keysInterval = {};
+          this.baseCls = 'view';
+        }
+
+        setDefaults() {
+          super.setDefaults();
+          if (this.displayContainer == null) {
+            return this.displayContainer = $('body');
+          }
+        }
+
+        mouseEnter() {
+          this.hovered = true;
+          $('body').keydown(this.callback('keyDown'));
+          return $('body').keyup(this.callback('keyUp'));
+        }
+
+        mouseLeave() {
+          var code, interval, ref, results;
+          this.hovered = false;
+          $('body').off('keydown', this.callback('keyDown'));
+          $('body').off('keyup', this.callback('keyUp'));
+          ref = this.keysInterval;
+          results = [];
+          for (code in ref) {
+            interval = ref[code];
+            results.push(clearInterval(interval));
+          }
+          return results;
+        }
+
+        keyDown(e) {
+          var key;
+          if (View.directionkeys[e.which] != null) {
+            key = View.directionkeys[e.which];
+            if (this.keysInterval[key.name] != null) {
+              clearInterval(this.keysInterval[key.name]);
+            }
+            return this.keysInterval[key.name] = setInterval(() => {
+              this.x += key.x * 2;
+              return this.y += key.y * 2;
+            }, 10);
+          }
+        }
+
+        keyUp(e) {
+          var key;
+          if (View.directionkeys[e.which] != null) {
+            key = View.directionkeys[e.which];
+            if (this.keysInterval[key.name] != null) {
+              return clearInterval(this.keysInterval[key.name]);
+            }
+          }
+        }
+
+        updateDisplayPos() {
+          return $('.viewContent', this.display).css({
+            left: this.x + 'px',
+            top: this.y + 'px'
+          });
+        }
+
+        containsPoint(x, y) {
+          var container;
+          container = this.display[0];
+          while (container) {
+            x -= container.offsetLeft;
+            y -= container.offsetTop;
+            container = container.offsetParent;
+          }
+          return (0 <= x && x <= this.display.width()) && (0 <= y && y <= this.display.height());
+        }
+
+      };
+
+      View.extend(Display);
+
+      View.directionkeys = {
+        38: {
+          name: 'top',
+          x: 0,
+          y: -1
+        },
+        39: {
+          name: 'right',
+          x: 1,
+          y: 0
+        },
+        40: {
+          name: 'bottom',
+          x: 0,
+          y: 1
+        },
+        37: {
+          name: 'left',
+          x: -1,
+          y: 0
+        }
+      };
+
+      View.properties({
+        x: {
+          default: 0,
+          change: function() {
+            return this.updateDisplayPos();
+          }
+        },
+        y: {
+          default: 0,
+          change: function() {
+            return this.updateDisplayPos();
+          }
+        },
+        display: {
+          calcul: function(invalidator, original) {
+            var display;
+            display = original();
+            if ($('.viewContent', display).length === 0) {
+              $(display).append('<div class="viewContent"></div>');
+            }
+            $(display).mouseenter(this.callback('mouseEnter'));
+            return $(display).mouseleave(this.callback('mouseLeave'));
+          },
+          change: function() {
+            return this.updateDisplayPos();
+          }
+        },
+        contentDisplay: {
+          calcul: function() {
+            return $('.viewContent', this.display);
+          }
+        },
+        boundsStyles: {
+          updater: Updater.instance,
+          calcul: function(invalidator) {
+            return {
+              top: invalidator.prop('top', this.bounds) * 100 + '%',
+              left: invalidator.prop('left', this.bounds) * 100 + '%',
+              bottom: 1 - invalidator.prop('bottom', this.bounds) * 100 + '%',
+              right: 1 - invalidator.prop('right', this.bounds) * 100 + '%'
+            };
+          },
+          active: function(invalidator) {
+            return invalidator.propInitiated('display') && (invalidator.prop('bounds') != null);
+          },
+          change: function(old) {
+            return this.contentDisplay.css(this.boundsStyles);
+          }
+        }
+      });
+
+      return View;
+
+    }).call(this);
+    return View;
+  });
+
+  (function(definition) {
+    DOM.Game = definition();
+    return DOM.Game.definition = definition;
+  })(function(dependencies = {}) {
+    var BaseGame, Game, View;
+    BaseGame = dependencies.hasOwnProperty("BaseGame") ? dependencies.BaseGame : Parallelio.Game;
+    View = dependencies.hasOwnProperty("View") ? dependencies.View : DOM.View;
+    Game = (function() {
+      class Game extends BaseGame {};
+
+      Game.prototype.defaultViewClass = View;
+
+      return Game;
+
+    }).call(this);
+    return Game;
+  });
+
+  (function(definition) {
     DOM.Projectile = definition();
     return DOM.Projectile.definition = definition;
   })(function(dependencies = {}) {
@@ -5275,6 +5794,15 @@
           return this.displayContainer;
         }
 
+        setDefaults() {
+          if (this.displayContainer == null) {
+            this.displayContainer = this.game.mainView.contentDisplay;
+          }
+          if (!(this.tiles.length > 0)) {
+            return this.generate();
+          }
+        }
+
         generate(generator) {
           generator = generator || (new Ship.Generator()).tap(function() {});
           return generator.getTiles().forEach((tile) => {
@@ -5311,6 +5839,13 @@
             display.get(0)._parallelio_obj = this;
             return display;
           }
+        },
+        game: {
+          change: function(old) {
+            if (this.game) {
+              return this.setDefaults();
+            }
+          }
         }
       });
 
@@ -5337,144 +5872,6 @@
 
     };
     return Ship;
-  });
-
-  (function(definition) {
-    DOM.View = definition();
-    return DOM.View.definition = definition;
-  })(function(dependencies = {}) {
-    var Element, View;
-    Element = dependencies.hasOwnProperty("Element") ? dependencies.Element : Parallelio.Element;
-    View = (function() {
-      class View extends Element {
-        constructor(display1 = null) {
-          super();
-          this.display = display1;
-          this.hovered = false;
-          this.keysInterval = {};
-        }
-
-        mouseEnter() {
-          this.hovered = true;
-          $('body').keydown(this.callback('keyDown'));
-          return $('body').keyup(this.callback('keyUp'));
-        }
-
-        mouseLeave() {
-          var code, interval, ref, results;
-          this.hovered = false;
-          $('body').off('keydown', this.callback('keyDown'));
-          $('body').off('keyup', this.callback('keyUp'));
-          ref = this.keysInterval;
-          results = [];
-          for (code in ref) {
-            interval = ref[code];
-            results.push(clearInterval(interval));
-          }
-          return results;
-        }
-
-        keyDown(e) {
-          var key;
-          if (View.directionkeys[e.which] != null) {
-            key = View.directionkeys[e.which];
-            if (this.keysInterval[key.name] != null) {
-              clearInterval(this.keysInterval[key.name]);
-            }
-            return this.keysInterval[key.name] = setInterval(() => {
-              this.x += key.x * 2;
-              return this.y += key.y * 2;
-            }, 10);
-          }
-        }
-
-        keyUp(e) {
-          var key;
-          if (View.directionkeys[e.which] != null) {
-            key = View.directionkeys[e.which];
-            if (this.keysInterval[key.name] != null) {
-              return clearInterval(this.keysInterval[key.name]);
-            }
-          }
-        }
-
-        updateDisplayPos() {
-          return $('.viewContent', this.display).css({
-            left: this.x + 'px',
-            top: this.y + 'px'
-          });
-        }
-
-        containsPoint(x, y) {
-          var container;
-          container = this.display[0];
-          while (container) {
-            x -= container.offsetLeft;
-            y -= container.offsetTop;
-            container = container.offsetParent;
-          }
-          return (0 <= x && x <= this.display.width()) && (0 <= y && y <= this.display.height());
-        }
-
-      };
-
-      View.directionkeys = {
-        38: {
-          name: 'top',
-          x: 0,
-          y: -1
-        },
-        39: {
-          name: 'right',
-          x: 1,
-          y: 0
-        },
-        40: {
-          name: 'bottom',
-          x: 0,
-          y: 1
-        },
-        37: {
-          name: 'left',
-          x: -1,
-          y: 0
-        }
-      };
-
-      View.properties({
-        x: {
-          default: 0,
-          change: function() {
-            return this.updateDisplayPos();
-          }
-        },
-        y: {
-          default: 0,
-          change: function() {
-            return this.updateDisplayPos();
-          }
-        },
-        display: {
-          change: function() {
-            if ($('.viewContent', this.display).length === 0) {
-              $(this.display).append('<div class="viewContent"></div>');
-            }
-            this.updateDisplayPos();
-            $(this.display).mouseenter(this.callback('mouseEnter'));
-            return $(this.display).mouseleave(this.callback('mouseLeave'));
-          }
-        },
-        contentDisplay: {
-          calcul: function() {
-            return $('.viewContent', this.display);
-          }
-        }
-      });
-
-      return View;
-
-    }).call(this);
-    return View;
   });
 
   (function(definition) {
