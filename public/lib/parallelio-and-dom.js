@@ -353,46 +353,59 @@
     return Parallelio.Spark.Binder.definition = definition;
   })(function() {
     var Binder;
-    Binder = class Binder {
-      bind() {
-        if (!this.binded && (this.callback != null) && (this.target != null)) {
-          this.doBind();
+    Binder = (function() {
+      class Binder {
+        bind() {
+          if (!this.binded && (this.callback != null) && (this.target != null)) {
+            this.doBind();
+          }
+          return this.binded = true;
         }
-        return this.binded = true;
-      }
 
-      doBind() {
-        throw new Error('Not implemented');
-      }
-
-      unbind() {
-        if (this.binded && (this.callback != null) && (this.target != null)) {
-          this.doUnbind();
+        doBind() {
+          throw new Error('Not implemented');
         }
-        return this.binded = false;
-      }
 
-      doUnbind() {
-        throw new Error('Not implemented');
-      }
+        unbind() {
+          if (this.binded && (this.callback != null) && (this.target != null)) {
+            this.doUnbind();
+          }
+          return this.binded = false;
+        }
 
-      equals(binder) {
-        return this.constructor.compareRefered(binder, this);
-      }
+        doUnbind() {
+          throw new Error('Not implemented');
+        }
 
-      static compareRefered(obj1, obj2) {
-        return obj1 === obj2 || ((obj1 != null) && (obj2 != null) && obj1.constructor === obj2.constructor && this.compareRef(obj1.ref, obj2.ref));
-      }
+        equals(binder) {
+          return this.constructor.compareRefered(binder, this);
+        }
 
-      static compareRef(ref1, ref2) {
-        return (ref1 != null) && (ref2 != null) && (ref1 === ref2 || (Array.isArray(ref1) && Array.isArray(ref1) && ref1.every((val, i) => {
-          return this.compareRefered(ref1[i], ref2[i]);
-        })) || (typeof ref1 === "object" && typeof ref2 === "object" && Object.keys(ref1).join() === Object.keys(ref2).join() && Object.keys(ref1).every((key) => {
-          return this.compareRefered(ref1[key], ref2[key]);
-        })));
-      }
+        getRef() {}
 
-    };
+        static compareRefered(obj1, obj2) {
+          return obj1 === obj2 || ((obj1 != null) && (obj2 != null) && obj1.constructor === obj2.constructor && this.compareRef(obj1.ref, obj2.ref));
+        }
+
+        static compareRef(ref1, ref2) {
+          return (ref1 != null) && (ref2 != null) && (ref1 === ref2 || (Array.isArray(ref1) && Array.isArray(ref1) && ref1.every((val, i) => {
+            return this.compareRefered(ref1[i], ref2[i]);
+          })) || (typeof ref1 === "object" && typeof ref2 === "object" && Object.keys(ref1).join() === Object.keys(ref2).join() && Object.keys(ref1).every((key) => {
+            return this.compareRefered(ref1[key], ref2[key]);
+          })));
+        }
+
+      };
+
+      Object.defineProperty(Binder.prototype, 'ref', {
+        get: function() {
+          return this.getRef();
+        }
+      });
+
+      return Binder;
+
+    }).call(this);
     return Binder;
   });
 
@@ -469,7 +482,10 @@
           super();
           this.target = target1;
           this.callback = callback1;
-          this.ref = {
+        }
+
+        getRef() {
+          return {
             target: this.target,
             callback: this.callback
           };
@@ -903,6 +919,10 @@
           return this._array[i];
         }
 
+        getRandom() {
+          return this._array[Math.floor(Math.random() * this._array.length)];
+        }
+
         set(i, val) {
           var old;
           if (this._array[i] !== val) {
@@ -1047,7 +1067,10 @@
         this.event = event1;
         this.target = target1;
         this.callback = callback1;
-        this.ref = {
+      }
+
+      getRef() {
+        return {
           event: this.event,
           target: this.target,
           callback: this.callback
@@ -1133,6 +1156,7 @@
             this.invalidate();
             return null;
           };
+          this.invalidateCallback.owner = this;
         }
 
         invalidate() {
@@ -1331,17 +1355,6 @@
     Invalidator = dependencies.hasOwnProperty("Invalidator") ? dependencies.Invalidator : Parallelio.Spark.Invalidator;
     BasicProperty = dependencies.hasOwnProperty("BasicProperty") ? dependencies.BasicProperty : Parallelio.Spark.BasicProperty;
     DynamicProperty = class DynamicProperty extends BasicProperty {
-      init() {
-        super.init();
-        return this.initRevalidate();
-      }
-
-      initRevalidate() {
-        return this.revalidateCallback = () => {
-          return this.get();
-        };
-      }
-
       callbackGet() {
         var res;
         res = this.callOptionFunct("get");
@@ -1357,17 +1370,6 @@
         return this;
       }
 
-      revalidated() {
-        super.revalidated();
-        return this.revalidateUpdater();
-      }
-
-      revalidateUpdater() {
-        if (this.getUpdater() != null) {
-          return this.getUpdater().unbind();
-        }
-      }
-
       _invalidateNotice() {
         if (this.isImmediate()) {
           this.get();
@@ -1376,34 +1378,12 @@
           if (typeof this.obj.emitEvent === 'function') {
             this.obj.emitEvent(this.invalidateEventName);
           }
-          if (this.getUpdater() != null) {
-            this.getUpdater().bind();
-          }
           return true;
         }
       }
 
-      getUpdater() {
-        if (typeof this.updater === 'undefined') {
-          if (this.property.options.updater != null) {
-            this.updater = this.property.options.updater;
-            if (typeof this.updater.getBinder === 'function') {
-              this.updater = this.updater.getBinder();
-            }
-            if (typeof this.updater.bind !== 'function' || typeof this.updater.unbind !== 'function') {
-              this.updater = null;
-            } else {
-              this.updater.callback = this.revalidateCallback;
-            }
-          } else {
-            this.updater = null;
-          }
-        }
-        return this.updater;
-      }
-
       isImmediate() {
-        return this.property.options.immediate !== false && (this.property.options.immediate === true || (typeof this.property.options.immediate === 'function' ? this.callOptionFunct("immediate") : (this.getUpdater() == null) && (this.hasChangedEvents() || this.hasChangedFunctions())));
+        return this.property.options.immediate !== false && (this.property.options.immediate === true || (typeof this.property.options.immediate === 'function' ? this.callOptionFunct("immediate") : this.hasChangedEvents() || this.hasChangedFunctions()));
       }
 
       static compose(prop) {
@@ -1659,6 +1639,96 @@
   });
 
   (function(definition) {
+    Parallelio.Spark.UpdatedProperty = definition();
+    return Parallelio.Spark.UpdatedProperty.definition = definition;
+  })(function(dependencies = {}) {
+    var DynamicProperty, Invalidator, Overrider, UpdatedProperty;
+    Invalidator = dependencies.hasOwnProperty("Invalidator") ? dependencies.Invalidator : Parallelio.Spark.Invalidator;
+    DynamicProperty = dependencies.hasOwnProperty("DynamicProperty") ? dependencies.DynamicProperty : Parallelio.Spark.DynamicProperty;
+    Overrider = dependencies.hasOwnProperty("Overrider") ? dependencies.Overrider : Parallelio.Spark.Overrider;
+    UpdatedProperty = (function() {
+      class UpdatedProperty extends DynamicProperty {
+        initRevalidate() {
+          this.revalidateCallback = () => {
+            this.updating = true;
+            this.get();
+            this.getUpdater().unbind();
+            if (this.pendingChanges) {
+              this.changed(this.pendingOld);
+            }
+            return this.updating = false;
+          };
+          return this.revalidateCallback.owner = this;
+        }
+
+        getUpdater() {
+          if (typeof this.updater === 'undefined') {
+            if (this.property.options.updater != null) {
+              this.updater = this.property.options.updater;
+              if (typeof this.updater.getBinder === 'function') {
+                this.updater = this.updater.getBinder();
+              }
+              if (typeof this.updater.bind !== 'function' || typeof this.updater.unbind !== 'function') {
+                this.updater = null;
+              } else {
+                this.updater.callback = this.revalidateCallback;
+              }
+            } else {
+              this.updater = null;
+            }
+          }
+          return this.updater;
+        }
+
+        static compose(prop) {
+          if (prop.options.updater != null) {
+            return prop.instanceType.extend(UpdatedProperty);
+          }
+        }
+
+      };
+
+      UpdatedProperty.extend(Overrider);
+
+      UpdatedProperty.overrides({
+        init: function() {
+          this.init.withoutUpdatedProperty();
+          return this.initRevalidate();
+        },
+        _invalidateNotice: function() {
+          var res;
+          res = this._invalidateNotice.withoutUpdatedProperty();
+          if (res) {
+            this.getUpdater().bind();
+          }
+          return res;
+        },
+        isImmediate: function() {
+          return false;
+        },
+        changed: function(old) {
+          if (this.updating) {
+            this.pendingChanges = false;
+            this.pendingOld = void 0;
+            this.changed.withoutUpdatedProperty(old);
+          } else {
+            this.pendingChanges = true;
+            if (typeof this.pendingOld === 'undefined') {
+              this.pendingOld = old;
+            }
+            this.getUpdater().bind();
+          }
+          return this;
+        }
+      });
+
+      return UpdatedProperty;
+
+    }).call(this);
+    return UpdatedProperty;
+  });
+
+  (function(definition) {
     Parallelio.Spark.ComposedProperty = definition();
     return Parallelio.Spark.ComposedProperty.definition = definition;
   })(function(dependencies = {}) {
@@ -1893,7 +1963,7 @@
     Parallelio.Spark.Property = definition();
     return Parallelio.Spark.Property.definition = definition;
   })(function(dependencies = {}) {
-    var ActivableProperty, BasicProperty, CalculatedProperty, CollectionProperty, ComposedProperty, DynamicProperty, InvalidatedProperty, Mixable, Property, PropertyOwner;
+    var ActivableProperty, BasicProperty, CalculatedProperty, CollectionProperty, ComposedProperty, DynamicProperty, InvalidatedProperty, Mixable, Property, PropertyOwner, UpdatedProperty;
     BasicProperty = dependencies.hasOwnProperty("BasicProperty") ? dependencies.BasicProperty : Parallelio.Spark.BasicProperty;
     CollectionProperty = dependencies.hasOwnProperty("CollectionProperty") ? dependencies.CollectionProperty : Parallelio.Spark.CollectionProperty;
     ComposedProperty = dependencies.hasOwnProperty("ComposedProperty") ? dependencies.ComposedProperty : Parallelio.Spark.ComposedProperty;
@@ -1901,6 +1971,7 @@
     CalculatedProperty = dependencies.hasOwnProperty("CalculatedProperty") ? dependencies.CalculatedProperty : Parallelio.Spark.CalculatedProperty;
     InvalidatedProperty = dependencies.hasOwnProperty("InvalidatedProperty") ? dependencies.InvalidatedProperty : Parallelio.Spark.InvalidatedProperty;
     ActivableProperty = dependencies.hasOwnProperty("ActivableProperty") ? dependencies.ActivableProperty : Parallelio.Spark.ActivableProperty;
+    UpdatedProperty = dependencies.hasOwnProperty("UpdatedProperty") ? dependencies.UpdatedProperty : Parallelio.Spark.UpdatedProperty;
     PropertyOwner = dependencies.hasOwnProperty("PropertyOwner") ? dependencies.PropertyOwner : Parallelio.Spark.PropertyOwner;
     Mixable = dependencies.hasOwnProperty("Mixable") ? dependencies.Mixable : Parallelio.Spark.Mixable;
     Property = (function() {
@@ -1985,7 +2056,7 @@
 
       };
 
-      Property.prototype.composers = [ComposedProperty, CollectionProperty, DynamicProperty, BasicProperty, CalculatedProperty, InvalidatedProperty, ActivableProperty];
+      Property.prototype.composers = [ComposedProperty, CollectionProperty, DynamicProperty, BasicProperty, UpdatedProperty, CalculatedProperty, InvalidatedProperty, ActivableProperty];
 
       return Property;
 
@@ -2016,14 +2087,14 @@
         if (this._callbacks == null) {
           this._callbacks = {};
         }
-        if (this._callbacks[name] != null) {
-          return this._callbacks[name];
-        } else {
-          return this._callbacks[name] = (...args) => {
+        if (this._callbacks[name] == null) {
+          this._callbacks[name] = (...args) => {
             this[name].apply(this, args);
             return null;
           };
+          this._callbacks[name].owner = this;
         }
+        return this._callbacks[name];
       }
 
       getFinalProperties() {
@@ -2608,6 +2679,16 @@
           this.name = name1;
         }
 
+        setDefaults() {
+          var candidates;
+          if (!this.tile && (this.game.mainTileContainer != null)) {
+            candidates = this.game.mainTileContainer.tiles.filter(function(tile) {
+              return tile.walkable !== false;
+            });
+            return this.tile = candidates[Math.floor(Math.random() * candidates.length)];
+          }
+        }
+
         walkTo(tile) {
           var path;
           if (this.walk != null) {
@@ -2625,6 +2706,16 @@
       };
 
       Character.extend(Damageable);
+
+      Character.properties({
+        game: {
+          change: function(old) {
+            if (this.game) {
+              return this.setDefaults();
+            }
+          }
+        }
+      });
 
       return Character;
 
@@ -3346,7 +3437,7 @@
 
         emitEvent(e, ...args) {
           var listeners;
-          listeners = this.getListeners(e);
+          listeners = this.getListeners(e).slice();
           return listeners.forEach(function(listener) {
             return listener(...args);
           });
@@ -5468,6 +5559,7 @@
           this.hovered = false;
           this.keysInterval = {};
           this.baseCls = 'view';
+          this.boundsStyles;
         }
 
         setDefaults() {
@@ -5547,21 +5639,21 @@
         38: {
           name: 'top',
           x: 0,
-          y: -1
+          y: 1
         },
         39: {
           name: 'right',
-          x: 1,
+          x: -1,
           y: 0
         },
         40: {
           name: 'bottom',
           x: 0,
-          y: 1
+          y: -1
         },
         37: {
           name: 'left',
-          x: -1,
+          x: 1,
           y: 0
         }
       };
@@ -5604,15 +5696,15 @@
             return {
               top: invalidator.prop('top', this.bounds) * 100 + '%',
               left: invalidator.prop('left', this.bounds) * 100 + '%',
-              bottom: 1 - invalidator.prop('bottom', this.bounds) * 100 + '%',
-              right: 1 - invalidator.prop('right', this.bounds) * 100 + '%'
+              bottom: (1 - invalidator.prop('bottom', this.bounds)) * 100 + '%',
+              right: (1 - invalidator.prop('right', this.bounds)) * 100 + '%'
             };
           },
           active: function(invalidator) {
             return invalidator.propInitiated('display') && (invalidator.prop('bounds') != null);
           },
           change: function(old) {
-            return this.contentDisplay.css(this.boundsStyles);
+            return this.display.css(this.boundsStyles);
           }
         }
       });
@@ -5799,7 +5891,10 @@
             this.displayContainer = this.game.mainView.contentDisplay;
           }
           if (!(this.tiles.length > 0)) {
-            return this.generate();
+            this.generate();
+          }
+          if (this.game.mainTileContainer == null) {
+            return this.game.mainTileContainer = this;
           }
         }
 

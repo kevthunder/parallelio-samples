@@ -1,4 +1,5 @@
 $(() => {
   this.game = new Parallelio.DOM.Game();
-  return this.ship = this.game.add(new Parallelio.DOM.Ship());
+  this.ship = this.game.add(new Parallelio.DOM.Ship());
+  return this.character = this.game.add(new Parallelio.DOM.Character());
 });
