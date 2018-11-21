@@ -55,8 +55,10 @@
 .character {
   z-index: 10;
   position: absolute;
-  font-size: 20px;
-  width: 20px;
+  font-size: 19px;
+  width: 19px;
+  margin-top: -10px;
+  margin-left: -10px;
   text-align: center; }
   .character:before {
     display: inline-block;
