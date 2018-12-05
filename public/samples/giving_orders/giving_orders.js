@@ -1,10 +1,11 @@
-var Game, LightBulb;
+var Game, LightBulb, Toggle;
 
 LightBulb = (function() {
   class LightBulb extends Parallelio.DOM.Tiled {
     constructor() {
       super();
       this.baseCls = 'lighbulb';
+      this.forwardedActions;
       this.initDisplay();
     }
 
@@ -15,6 +16,12 @@ LightBulb = (function() {
     }
 
   };
+
+  LightBulb.extend(Parallelio.Obstacle);
+
+  LightBulb.extend(Parallelio.SimpleActionProvider);
+
+  LightBulb.extend(Parallelio.TiledActionProvider);
 
   LightBulb.properties({
     game: {
@@ -30,12 +37,21 @@ LightBulb = (function() {
 
 }).call(this);
 
+LightBulb.actions = {
+  Toggle: Toggle = class Toggle extends Parallelio.TargetAction {
+    execute() {
+      return this.target.enabled = !this.target.enabled;
+    }
+
+  }
+};
+
 Game = class Game extends Parallelio.DOM.Game {
   start() {
     super.start();
     this.ship = this.add(new Parallelio.DOM.Ship());
-    this.character = this.add(new Parallelio.DOM.Character());
-    return this.lightBulb = this.add(new LightBulb());
+    this.lightBulb = this.add(new LightBulb());
+    return this.character = this.add(new Parallelio.DOM.Character());
   }
 
 };
