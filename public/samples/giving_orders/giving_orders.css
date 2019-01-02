@@ -16,5 +16,5 @@ body {
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     content: ""; }
-  .lighbulb.enabled {
+  .lighbulb.on {
     color: #eee; }

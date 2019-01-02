@@ -4,8 +4,10 @@ LightBulb = (function() {
   class LightBulb extends Parallelio.DOM.Tiled {
     constructor() {
       super();
+      this.tile;
       this.baseCls = 'lighbulb';
       this.forwardedActions;
+      this.enabledClass;
       this.initDisplay();
     }
 
@@ -30,6 +32,22 @@ LightBulb = (function() {
           return this.setDefaults();
         }
       }
+    },
+    enabled: {
+      default: false
+    },
+    enabledClass: {
+      updater: Parallelio.DOM.Updater.instance,
+      active: function(invalidator) {
+        return invalidator.propInitiated('display');
+      },
+      calcul: function(invalidator) {
+        return invalidator.prop('enabled');
+      },
+      change: function() {
+        this.display.toggleClass('on', this.enabledClass);
+        return this.display.toggleClass('off', !this.enabledClass);
+      }
     }
   });
 
@@ -51,7 +69,8 @@ Game = class Game extends Parallelio.DOM.Game {
     super.start();
     this.ship = this.add(new Parallelio.DOM.Ship());
     this.lightBulb = this.add(new LightBulb());
-    return this.character = this.add(new Parallelio.DOM.Character());
+    this.character = this.add(new Parallelio.DOM.Character("Character 1"));
+    return this.selectionInfo = this.add(new Parallelio.DOM.PlayerSelectionInfo());
   }
 
 };

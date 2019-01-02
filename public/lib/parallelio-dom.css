@@ -6,6 +6,17 @@
   font-weight: normal;
   font-style: normal; }
 
+.ui {
+  position: absolute;
+  width: 200px;
+  z-index: 100;
+  background: #000;
+  right: 0;
+  padding: 1rem;
+  top: 0;
+  bottom: 0;
+  border-left: 1px solid #333; }
+
 .view {
   background: #000;
   position: absolute;

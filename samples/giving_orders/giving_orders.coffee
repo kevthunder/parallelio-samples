@@ -5,8 +5,10 @@ class LightBulb extends Parallelio.DOM.Tiled
 
   constructor: () ->
     super()
+    @tile
     @baseCls = 'lighbulb'
     @forwardedActions
+    @enabledClass
     @initDisplay()
 
   @properties
@@ -14,6 +16,19 @@ class LightBulb extends Parallelio.DOM.Tiled
       change: (old)->
         if @game 
           @setDefaults()
+    enabled:
+      default: false
+    enabledClass:
+      updater: Parallelio.DOM.Updater.instance
+      active: (invalidator)->
+        invalidator.propInitiated('display')
+      calcul: (invalidator)->
+        invalidator.prop('enabled')
+      change: ->
+        @display.toggleClass('on', @enabledClass)
+        @display.toggleClass('off', !@enabledClass)
+
+
 
   setDefaults: ->
     if !@tile && @game.mainTileContainer?
@@ -30,7 +45,8 @@ class Game extends Parallelio.DOM.Game
     super()
     @ship = @add(new Parallelio.DOM.Ship())
     @lightBulb = @add(new LightBulb())
-    @character = @add(new Parallelio.DOM.Character())
+    @character = @add(new Parallelio.DOM.Character("Character 1"))
+    @selectionInfo = @add(new Parallelio.DOM.PlayerSelectionInfo())
 
 $ =>
   this.game = new Game()
