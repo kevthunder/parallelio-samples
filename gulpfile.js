@@ -4,20 +4,19 @@ var open = require('gulp-open');
 var index = require('gulp-index');
 var coffee = require('gulp-coffee');
 var sass = require('gulp-sass');
-
+var linkInfo = require('npm-link-info');
+var childProcess = require('child_process');
 
 function libSources(){
   return [
-    require.resolve('parallelio-dom/dist/parallelio-and-dom.js'),
+    require.resolve('parallelio-dom/dist/parallelio-dom.js'),
     require.resolve('parallelio-dom/css/parallelio-dom.css')
   ]
 }
+
 gulp.task('copyLib', function() {
-  return gulp.src(libSources())
+  return gulp.src(libSources(),{allowEmpty:true})
     .pipe(gulp.dest('./public/lib'));
-});
-gulp.task('watchLib', function() {
-  return gulp.watch(libSources(), gulp.series('copyLib'));
 });
 
 gulp.task('copyHtml', function() {
@@ -76,6 +75,17 @@ gulp.task('open', function(){
   .pipe(open(options));
 });
 
-gulp.task('watch', gulp.parallel('watchSass','watchCoffee','watchHtml','watchLib'));
+gulp.task('watchLinked', function(done){
+  if(linkInfo.isLinked('parallelio-dom')){
+    gulp.watch(libSources(), gulp.series('copyLib')).on('ready',function(...arg){
+      childProcess.spawn('npx', ['gulp','watch'], { cwd: linkInfo.baseFolder('parallelio-dom'), stdio: 'inherit' })
+      .on('close', done);
+    })
+  }else{
+    done()
+  }
+});
+
+gulp.task('watch', gulp.parallel('watchSass','watchLinked','watchCoffee','watchHtml'));
 
 gulp.task('dev', gulp.series('build', 'serve', 'open', 'watch'));
