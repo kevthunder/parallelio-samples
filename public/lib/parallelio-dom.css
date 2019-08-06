@@ -129,3 +129,55 @@
   .wire.connUp.connDown::after {
     height: 19px;
     top: -7px; }
+
+.star {
+  font-size: 16px;
+  width: 16px;
+  margin-top: -8px;
+  margin-left: -8px;
+  position: absolute;
+  text-align: center; }
+  .star:before {
+    display: inline-block;
+    font-family: FontAwesome;
+    text-rendering: auto;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    content: ""; }
+
+.mapBackground {
+  position: absolute; }
+
+@-moz-keyframes spin {
+  100% {
+    -moz-transform: rotate(-360deg); } }
+
+@-webkit-keyframes spin {
+  100% {
+    -webkit-transform: rotate(-360deg); } }
+
+@keyframes spin {
+  100% {
+    -webkit-transform: rotate(-360deg);
+    transform: rotate(-360deg); } }
+
+.ship {
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  margin: -5px 0 0 -5px; }
+  .ship:before {
+    position: absolute;
+    display: inline-block;
+    font-family: FontAwesome;
+    text-rendering: auto;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    content: ""; }
+  .ship.orbiting {
+    -webkit-animation: spin 10s linear infinite;
+    -moz-animation: spin 10s linear infinite;
+    animation: spin 10s linear infinite; }
+    .ship.orbiting::before {
+      top: 5px;
+      left: -5px; }
