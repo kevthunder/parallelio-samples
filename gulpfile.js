@@ -1,4 +1,5 @@
 var gulp = require('gulp');
+var path = require('path');
 var gls = require('gulp-live-server');
 var open = require('gulp-open');
 var index = require('gulp-index');
@@ -6,6 +7,7 @@ var coffee = require('gulp-coffee');
 var sass = require('gulp-sass');
 var linkInfo = require('npm-link-info');
 var childProcess = require('child_process');
+var clean = require('gulp-clean');
 
 function libSources(){
   return [
@@ -13,6 +15,12 @@ function libSources(){
     require.resolve('parallelio-dom/css/parallelio-dom.css')
   ]
 }
+
+gulp.task('copySharedSass', function() {
+  dir = path.dirname(require.resolve('parallelio-dom/sass/parallelio-dom.sass'));
+  return gulp.src(dir+'/**',{allowEmpty:true})
+    .pipe(gulp.dest('./shared/sass/parallelio-dom'));
+});
 
 gulp.task('copyLib', function() {
   return gulp.src(libSources(),{allowEmpty:true})
@@ -52,7 +60,12 @@ gulp.task('buildIndex', function() {
     .pipe(gulp.dest('./public/'));
 });
 
-gulp.task('build', gulp.series('copyLib', 'coffee', 'sass', 'copyHtml', 'buildIndex'));
+gulp.task('clean', function() {
+  return gulp.src(['./public/samples'], {read: false, allowEmpty:true})
+  .pipe(clean());
+});
+
+gulp.task('build', gulp.series('clean', 'copySharedSass', 'copyLib', 'coffee', 'sass', 'copyHtml', 'buildIndex'));
 
 gulp.task('serve', function(done) {
   var server = gls.static('public');
@@ -77,7 +90,7 @@ gulp.task('open', function(){
 
 gulp.task('watchLinked', function(done){
   if(linkInfo.isLinked('parallelio-dom')){
-    gulp.watch(libSources(), gulp.series('copyLib')).on('ready',function(...arg){
+    gulp.watch(libSources(), gulp.series('copySharedSass', 'copyLib')).on('ready',function(...arg){
       childProcess.spawn('npx', ['gulp','watch'], { cwd: linkInfo.baseFolder('parallelio-dom'), stdio: 'inherit' })
       .on('close', done);
     })
