@@ -1,14 +1,10 @@
 class LightBulb extends Parallelio.DOM.Tiled
   @extend Parallelio.Obstacle
-  @extend Parallelio.SimpleActionProvider
-  @extend Parallelio.TiledActionProvider
 
   constructor: () ->
     super()
-    @tile
     @baseCls = 'lighbulb'
-    @forwardedActions
-    @enabledClass
+    @actionProvider
     @initDisplay()
 
   @properties
@@ -19,23 +15,26 @@ class LightBulb extends Parallelio.DOM.Tiled
     enabled:
       default: false
     enabledClass:
-      updater: Parallelio.DOM.Updater.instance
-      active: (invalidator)->
-        invalidator.propInitiated('display')
       calcul: (invalidator)->
-        invalidator.prop('enabled')
-      change: ->
+        invalidator.prop(@enabledProperty)
+      change: new Parallelio.DOM.DomUpdater callback: ()->
         @display.toggleClass('on', @enabledClass)
         @display.toggleClass('off', !@enabledClass)
-
-
+    actionProvider:
+      calcul: ()->
+        return new Parallelio.actions.TiledActionProvider({
+          owner: this,
+          actions: [
+            new LightBulb.actions.Toggle()
+          ]
+        })
 
   setDefaults: ->
     if !@tile && @game.mainTileContainer?
       @putOnRandomTile(@game.mainTileContainer.tiles)
-
-LightBulb.actions = 
-  Toggle : class Toggle extends Parallelio.TargetAction
+      
+LightBulb.actions = {}
+class LightBulb.actions.Toggle extends Parallelio.actions.TargetAction
     execute: ->
       @target.enabled = !@target.enabled
 
@@ -43,7 +42,7 @@ LightBulb.actions =
 class Game extends Parallelio.DOM.Game
   start: ->
     super()
-    @ship = @add(new Parallelio.DOM.Ship())
+    @ship = @add(new Parallelio.DOM.ShipInterior())
     @lightBulb = @add(new LightBulb())
     @character = @add(new Parallelio.DOM.Character("Character 1"))
     @selectionInfo = @add(new Parallelio.DOM.PlayerSelectionInfo())
