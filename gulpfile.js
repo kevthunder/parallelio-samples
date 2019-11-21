@@ -88,6 +88,15 @@ gulp.task('open', function(){
   .pipe(open(options));
 });
 
+gulp.task('buildLinked', function(done){
+  if(linkInfo.isLinked('parallelio-dom')){
+    childProcess.spawn('npx', ['gulp','build'], { cwd: linkInfo.baseFolder('parallelio-dom'), stdio: 'inherit' })
+      .on('close', done);
+  }else{
+    done()
+  }
+});
+
 gulp.task('watchLinked', function(done){
   if(linkInfo.isLinked('parallelio-dom')){
     gulp.watch(libSources(), gulp.series('copySharedSass', 'copyLib')).on('ready',function(...arg){
@@ -101,4 +110,4 @@ gulp.task('watchLinked', function(done){
 
 gulp.task('watch', gulp.parallel('watchSass','watchLinked','watchCoffee','watchHtml'));
 
-gulp.task('dev', gulp.series('build', 'serve', 'open', 'watch'));
+gulp.task('dev', gulp.series('buildLinked', 'build', 'serve', 'open', 'watch'));
