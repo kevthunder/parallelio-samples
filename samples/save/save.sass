@@ -1,0 +1,19 @@
+
+@import '../../shared/sass/parallelio-dom/variables'
+@import '../../shared/sass/parallelio-dom/mixins/icon'
+
+$fa-var-desktop: "\f108"
+
+body
+  background: #000
+  color: #666
+
+.controlPanel
+  z-index: 10
+  position: absolute
+  font-size: $tilesize - 1
+  width: $tilesize - 1
+  text-align: center
+  color: #eee
+  &:before
+    @include fa-icon($fa-var-desktop)

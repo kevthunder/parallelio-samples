@@ -1,0 +1,19 @@
+@charset "UTF-8";
+body {
+  background: #000;
+  color: #666; }
+
+.controlPanel {
+  z-index: 10;
+  position: absolute;
+  font-size: 19px;
+  width: 19px;
+  text-align: center;
+  color: #eee; }
+  .controlPanel:before {
+    display: inline-block;
+    font-family: FontAwesome;
+    text-rendering: auto;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    content: ""; }
