@@ -14,10 +14,11 @@
   "author": "kevthunder",
   "license": "ISC",
   "dependencies": {
-    "npm-link-info": "^0.1.1",
     "parallelio-dom": "github:kevthunder/parallelio-dom"
   },
   "devDependencies": {
+    "npm-link-info": "^0.1.1",
+    "cross-spawn": "^7.0.3",
     "gulp": "^4.0",
     "gulp-clean": "^0.4.0",
     "gulp-coffee": "^3.0.3",

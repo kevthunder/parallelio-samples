@@ -1,15 +1,31 @@
 var Allie, Fow, Game;
 
 Allie = class Allie extends Parallelio.DOM.Character {
-  canGoOnTile(tile) {
-    return (tile != null ? tile.walkable : void 0) !== false && tile.x < tile.container.boundaries.left + 10;
+  canPlaceOnTile(tile) {
+    return ((tile != null ? tile.walkable : void 0) != null) && (tile != null ? tile.walkable : void 0) !== false && tile.x < tile.container.boundaries.left + 10;
+  }
+
+  putOnRandomTile(tiles) {
+    var found;
+    found = this.getRandomValidTile(tiles, this.canPlaceOnTile.bind(this));
+    if (found) {
+      return this.tile = found;
+    }
   }
 
 };
 
 Fow = class Fow extends Parallelio.DOM.Character {
-  canGoOnTile(tile) {
-    return (tile != null ? tile.walkable : void 0) !== false && tile.x > tile.container.boundaries.right - 10;
+  canPlaceOnTile(tile) {
+    return ((tile != null ? tile.walkable : void 0) != null) && (tile != null ? tile.walkable : void 0) !== false && tile.x > tile.container.boundaries.right - 10;
+  }
+
+  putOnRandomTile(tiles) {
+    var found;
+    found = this.getRandomValidTile(tiles, this.canPlaceOnTile.bind(this));
+    if (found) {
+      return this.tile = found;
+    }
   }
 
   init() {
@@ -22,7 +38,7 @@ Fow = class Fow extends Parallelio.DOM.Character {
 Game = class Game extends Parallelio.DOM.Game {
   start() {
     super.start();
-    this.ship = this.add(new Parallelio.DOM.Ship());
+    this.ship = this.add(new Parallelio.DOM.ShipInterior());
     this.allies = ['Crew 1', 'Crew 2', 'Crew 3', 'Crew 4'].map((name) => {
       return this.add(new Allie().tap(function() {
         return this.name = name;

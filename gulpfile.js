@@ -6,7 +6,7 @@ var index = require('gulp-index');
 var coffee = require('gulp-coffee');
 var sass = require('gulp-sass');
 var linkInfo = require('npm-link-info');
-var childProcess = require('child_process');
+const spawn = require('cross-spawn');
 var clean = require('gulp-clean');
 
 function libSources(){
@@ -89,8 +89,8 @@ gulp.task('open', function(){
 });
 
 gulp.task('buildLinked', function(done){
-  if(linkInfo.isLinked('parallelio-dom')){
-    childProcess.spawn('npx', ['gulp','build'], { cwd: linkInfo.baseFolder('parallelio-dom'), stdio: 'inherit' })
+  if(linkInfo.isLinked('parallelio-dom', process.env.INIT_CWD)){
+    spawn('npx', ['gulp','build'], { cwd: linkInfo.baseFolder('parallelio-dom'), stdio: 'inherit' })
       .on('close', done);
   }else{
     done()
@@ -98,9 +98,9 @@ gulp.task('buildLinked', function(done){
 });
 
 gulp.task('watchLinked', function(done){
-  if(linkInfo.isLinked('parallelio-dom')){
+  if(linkInfo.isLinked('parallelio-dom', process.env.INIT_CWD)){
     gulp.watch(libSources(), gulp.series('copySharedSass', 'copyLib')).on('ready',function(...arg){
-      childProcess.spawn('npx', ['gulp','watch'], { cwd: linkInfo.baseFolder('parallelio-dom'), stdio: 'inherit' })
+      spawn('npx', ['gulp','watch'], { cwd: linkInfo.baseFolder('parallelio-dom'), stdio: 'inherit' })
       .on('close', done);
     })
   }else{

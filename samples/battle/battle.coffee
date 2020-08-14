@@ -1,15 +1,26 @@
 
 
 class Allie extends Parallelio.DOM.Character
-  canGoOnTile: (tile)->
-    tile?.walkable != false and 
+  canPlaceOnTile: (tile)->
+    tile?.walkable? and 
+      tile?.walkable != false and
       tile.x < tile.container.boundaries.left + 10
 
+  putOnRandomTile: (tiles)->
+    found = this.getRandomValidTile(tiles,this.canPlaceOnTile.bind(this))
+    if found
+      this.tile = found
 
 class Fow extends Parallelio.DOM.Character
-  canGoOnTile: (tile)->
-    tile?.walkable != false and 
+  canPlaceOnTile: (tile)->
+    tile?.walkable? and 
+      tile?.walkable != false and
       tile.x > tile.container.boundaries.right - 10
+
+  putOnRandomTile: (tiles)->
+    found = this.getRandomValidTile(tiles,this.canPlaceOnTile.bind(this))
+    if found
+      this.tile = found
 
   init: ()->
     super()
@@ -19,7 +30,7 @@ class Fow extends Parallelio.DOM.Character
 class Game extends Parallelio.DOM.Game
   start: ->
     super()
-    @ship = @add(new Parallelio.DOM.Ship())
+    @ship = @add(new Parallelio.DOM.ShipInterior())
 
     @allies = ['Crew 1','Crew 2','Crew 3','Crew 4'].map (name) =>
       @add(
