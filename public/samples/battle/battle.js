@@ -13,6 +13,13 @@ Allie = class Allie extends Parallelio.DOM.Character {
     }
   }
 
+  init() {
+    this.actionProvider.actionsMembers.add(new Parallelio.actions.AttackMoveAction({
+      actor: this
+    }));
+    return super.init();
+  }
+
 };
 
 Fow = class Fow extends Parallelio.DOM.Character {

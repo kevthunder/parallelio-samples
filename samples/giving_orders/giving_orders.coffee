@@ -25,7 +25,7 @@ class LightBulb extends Parallelio.DOM.Tiled
         return new Parallelio.actions.TiledActionProvider({
           owner: this,
           actions: [
-            new LightBulb.actions.Toggle()
+            new LightBulb.actions.Toggle(target:this)
           ]
         })
 
@@ -38,13 +38,28 @@ class LightBulb.actions.Toggle extends Parallelio.actions.TargetAction
     execute: ->
       @target.enabled = !@target.enabled
 
+class Character extends Parallelio.DOM.Character
+  @properties
+   actionProvider:
+    calcul: (invalidator)->
+      provider = new Parallelio.actions.ActionProvider({
+        owner: this
+      })
+      provider.actionsMembers.push (prev, invalidator)=>
+        actions = invalidator.propPath('owner.tile.actionProvider.actions')
+        if actions?
+          console.log(actions)
+          actions.map (a)=>
+            a.withActor(this)
+      return provider
+
 
 class Game extends Parallelio.DOM.Game
   start: ->
     super()
     @ship = @add(new Parallelio.DOM.ShipInterior())
     @lightBulb = @add(new LightBulb())
-    @character = @add(new Parallelio.DOM.Character("Character 1"))
+    @character = @add(new Character("Character 1"))
     @selectionInfo = @add(new Parallelio.DOM.PlayerSelectionInfo())
 
 $ =>

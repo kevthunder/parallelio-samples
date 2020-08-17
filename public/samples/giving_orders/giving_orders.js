@@ -1,4 +1,4 @@
-var Game, LightBulb;
+var Character, Game, LightBulb;
 
 LightBulb = (function() {
   class LightBulb extends Parallelio.DOM.Tiled {
@@ -45,7 +45,11 @@ LightBulb = (function() {
       calcul: function() {
         return new Parallelio.actions.TiledActionProvider({
           owner: this,
-          actions: [new LightBulb.actions.Toggle()]
+          actions: [
+            new LightBulb.actions.Toggle({
+              target: this
+            })
+          ]
         });
       }
     }
@@ -64,12 +68,41 @@ LightBulb.actions.Toggle = class Toggle extends Parallelio.actions.TargetAction 
 
 };
 
+Character = (function() {
+  class Character extends Parallelio.DOM.Character {};
+
+  Character.properties({
+    actionProvider: {
+      calcul: function(invalidator) {
+        var provider;
+        provider = new Parallelio.actions.ActionProvider({
+          owner: this
+        });
+        provider.actionsMembers.push((prev, invalidator) => {
+          var actions;
+          actions = invalidator.propPath('owner.tile.actionProvider.actions');
+          if (actions != null) {
+            console.log(actions);
+            return actions.map((a) => {
+              return a.withActor(this);
+            });
+          }
+        });
+        return provider;
+      }
+    }
+  });
+
+  return Character;
+
+}).call(this);
+
 Game = class Game extends Parallelio.DOM.Game {
   start() {
     super.start();
     this.ship = this.add(new Parallelio.DOM.ShipInterior());
     this.lightBulb = this.add(new LightBulb());
-    this.character = this.add(new Parallelio.DOM.Character("Character 1"));
+    this.character = this.add(new Character("Character 1"));
     return this.selectionInfo = this.add(new Parallelio.DOM.PlayerSelectionInfo());
   }
 

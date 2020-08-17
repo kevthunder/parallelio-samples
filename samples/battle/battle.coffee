@@ -11,6 +11,10 @@ class Allie extends Parallelio.DOM.Character
     if found
       this.tile = found
 
+  init: ()->
+    this.actionProvider.actionsMembers.add(new Parallelio.actions.AttackMoveAction({actor:this}))
+    super()
+
 class Fow extends Parallelio.DOM.Character
   canPlaceOnTile: (tile)->
     tile?.walkable? and 
